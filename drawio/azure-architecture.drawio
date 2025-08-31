@@ -1,0 +1,157 @@
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="5.0" etag="example" version="22.1.0" type="device">
+  <diagram name="Azure-Architecture-NAT" id="azure-arch-nat">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Internet -->
+        <mxCell id="internet" value="Internet" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#d79b9b;" vertex="1" parent="1">
+          <mxGeometry x="500" y="30" width="80" height="50" as="geometry" />
+        </mxCell>
+        <!-- Azure Front Door -->
+        <mxCell id="frontdoor" value="Azure Front Door&#xa;(CDN + WAF)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="450" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <!-- Hub VNet -->
+        <mxCell id="hub-vnet" value="Hub VNet" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="220" width="200" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="firewall" value="Azure Firewall" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="110" y="250" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="bastion" value="Azure Bastion" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="110" y="310" width="80" height="40" as="geometry" />
+        </mxCell>
+        <!-- Spoke VNet -->
+        <mxCell id="spoke-vnet" value="Spoke VNet" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="350" y="220" width="400" height="300" as="geometry" />
+        </mxCell>
+        <!-- App Gateway -->
+        <mxCell id="appgw" value="Application Gateway&#xa;v2 (WAF)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="380" y="250" width="100" height="50" as="geometry" />
+        </mxCell>
+        <!-- App Services -->
+        <mxCell id="webapp" value="App Service&#xa;Web Apps" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="380" y="330" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="apiapp" value="App Service&#xa;API Apps" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="480" y="330" width="80" height="50" as="geometry" />
+        </mxCell>
+        <!-- NAT Gateway -->
+        <mxCell id="nat" value="NAT Gateway&#xa;(Static IP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3e5fc;strokeColor=#0277bd;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="400" width="80" height="50" as="geometry" />
+        </mxCell>
+        <!-- AKS -->
+        <mxCell id="aks" value="AKS Cluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="580" y="330" width="80" height="50" as="geometry" />
+        </mxCell>
+        <!-- PaaS Services -->
+        <mxCell id="paas-box" value="Azure PaaS Services" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="800" y="220" width="200" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="keyvault" value="Key Vault" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="820" y="250" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="sqldb" value="Azure SQL DB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="820" y="300" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cosmosdb" value="Cosmos DB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="820" y="350" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="openai" value="Azure OpenAI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="820" y="400" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="storage" value="Blob Storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="820" y="450" width="70" height="30" as="geometry" />
+        </mxCell>
+        <!-- External APIs -->
+        <mxCell id="external-apis" value="External APIs&#xa;&amp; Services" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#d79b9b;" vertex="1" parent="1">
+          <mxGeometry x="600" y="30" width="100" height="60" as="geometry" />
+        </mxCell>
+        <!-- Connections -->
+        <!-- User to Front Door -->
+        <mxCell id="conn1" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="internet" target="frontdoor">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="530" y="170" as="sourcePoint" />
+            <mxPoint x="580" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- Front Door to App Gateway -->
+        <mxCell id="conn2" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="frontdoor" target="appgw">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="200" as="sourcePoint" />
+            <mxPoint x="470" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- App Gateway to App Services -->
+        <mxCell id="conn3" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="appgw" target="webapp">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="370" y="330" as="sourcePoint" />
+            <mxPoint x="420" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn4" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="appgw" target="apiapp">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="470" y="330" as="sourcePoint" />
+            <mxPoint x="520" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- App Services to NAT Gateway -->
+        <mxCell id="conn5" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#0277bd;strokeWidth=2;" edge="1" parent="1" source="webapp" target="nat">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="420" as="sourcePoint" />
+            <mxPoint x="430" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn6" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#0277bd;strokeWidth=2;" edge="1" parent="1" source="apiapp" target="nat">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="480" y="420" as="sourcePoint" />
+            <mxPoint x="530" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- NAT Gateway to External -->
+        <mxCell id="conn7" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;strokeColor=#0277bd;strokeWidth=3;" edge="1" parent="1" source="nat" target="external-apis">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="530" y="150" as="sourcePoint" />
+            <mxPoint x="580" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- App Services to PaaS (Private Link) -->
+        <mxCell id="conn8" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeStyle=dashed;strokeColor=#9673a6;" edge="1" parent="1" source="apiapp" target="sqldb">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="570" y="350" as="sourcePoint" />
+            <mxPoint x="620" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn9" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeStyle=dashed;strokeColor=#9673a6;" edge="1" parent="1" source="apiapp" target="openai">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="570" y="380" as="sourcePoint" />
+            <mxPoint x="620" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- AKS to Firewall -->
+        <mxCell id="conn10" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="aks" target="firewall">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="530" y="300" as="sourcePoint" />
+            <mxPoint x="580" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- Firewall to External -->
+        <mxCell id="conn11" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="firewall" target="internet">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="200" y="150" as="sourcePoint" />
+            <mxPoint x="250" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- Title -->
+        <mxCell id="title" value="Azure Architecture with NAT Gateway for App Service Egress" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="10" width="400" height="30" as="geometry" />
+        </mxCell>
+        <!-- Legend -->
+        <mxCell id="legend" value="Legend:&#xa;━━ NAT Gateway Traffic&#xa;┅┅ Private Link&#xa;── Standard Traffic" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="400" width="150" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

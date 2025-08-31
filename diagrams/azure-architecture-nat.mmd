@@ -1,0 +1,127 @@
+flowchart LR
+  %% Identity and Edge
+  AADB2C[Azure AD B2C]
+  subgraph Global
+    DNS[Azure DNS]
+    FDR[Azure Front Door Premium\n(CDN + WAF + Global LB)]
+  end
+  EndUser[Users (Web/Mobile/B2B)] --> DNS --> FDR
+  EndUser -. OIDC/OAuth2 .- AADB2C
+
+  %% Region A Hub-Spoke (Firewall still used by AKS/others)
+  subgraph HubA[Region A Hub]
+    ERGW_A[ExpressRoute/VPN GW]
+    AFW_A[Azure Firewall]
+    Bastion_A[Bastion]
+    PDR_A[Private DNS Resolver]
+  end
+  subgraph RegionA[Region A Spoke]
+    direction TB
+    subgraph DMZ_A[DMZ Subnet]
+      AppGW_A[Application Gateway v2 (WAF)]
+      APIM_A[API Management Premium (Internal)]
+    end
+    subgraph APP_A[App Tier]
+      AppSvcWeb_A[App Service - Web Apps]
+      AppSvcAPI_A[App Service - API Apps]
+      AKS_A[AKS Cluster (AGIC)]
+      NAT_A[NAT Gateway\n(App Service Integration Subnet)]
+    end
+    subgraph DATA_A[Data/PE Subnet]
+      KV_A[Key Vault (PE)]
+      SQL_A[Azure SQL DB (PE)]
+      Redis_A[Redis Cache (PE)]
+      Cosmos_A[Cosmos DB (PE)]
+      Storage_A[Storage (PE)]
+      Synapse_A[Synapse (PE)]
+      OpenAI_A[Azure OpenAI (PE)]
+      PDNSZ_A[Private DNS Zones (linked)]
+    end
+  end
+
+  %% Region B Hub-Spoke
+  subgraph HubB[Region B Hub]
+    ERGW_B[ExpressRoute/VPN GW]
+    AFW_B[Azure Firewall]
+    Bastion_B[Bastion]
+    PDR_B[Private DNS Resolver]
+  end
+  subgraph RegionB[Region B Spoke]
+    direction TB
+    subgraph DMZ_B[DMZ Subnet]
+      AppGW_B[Application Gateway v2 (WAF)]
+      APIM_B[API Management Premium (Internal)]
+    end
+    subgraph APP_B[App Tier]
+      AppSvcWeb_B[App Service - Web Apps]
+      AppSvcAPI_B[App Service - API Apps]
+      AKS_B[AKS Cluster (AGIC)]
+      NAT_B[NAT Gateway\n(App Service Integration Subnet)]
+    end
+    subgraph DATA_B[Data/PE Subnet]
+      KV_B[Key Vault (PE)]
+      SQL_B[Azure SQL DB (PE)]
+      Redis_B[Redis Cache (PE)]
+      Cosmos_B[Cosmos DB (PE)]
+      Storage_B[Storage (PE)]
+      Synapse_B[Synapse (PE)]
+      OpenAI_B[Azure OpenAI (PE)]
+      PDNSZ_B[Private DNS Zones (linked)]
+    end
+  end
+
+  %% Cross-region connectivity
+  subgraph OnPrem[On-Premises]
+    OnPremDC[Data Center]
+    OnPremUsers[Enterprise Users]
+  end
+
+  %% Connections
+  FDR --> AppGW_A
+  FDR --> AppGW_B
+  
+  AppGW_A --> APIM_A
+  AppGW_B --> APIM_B
+  
+  APIM_A --> AppSvcWeb_A
+  APIM_A --> AppSvcAPI_A
+  APIM_A --> AKS_A
+  
+  APIM_B --> AppSvcWeb_B
+  APIM_B --> AppSvcAPI_B
+  APIM_B --> AKS_B
+  
+  AppSvcWeb_A --> NAT_A
+  AppSvcAPI_A --> NAT_A
+  AppSvcWeb_B --> NAT_B
+  AppSvcAPI_B --> NAT_B
+  
+  AppSvcWeb_A -.-> KV_A
+  AppSvcAPI_A -.-> SQL_A
+  AppSvcAPI_A -.-> OpenAI_A
+  AppSvcAPI_A -.-> Cosmos_A
+  
+  AppSvcWeb_B -.-> KV_B
+  AppSvcAPI_B -.-> SQL_B
+  AppSvcAPI_B -.-> OpenAI_B
+  AppSvcAPI_B -.-> Cosmos_B
+  
+  AKS_A --> AFW_A
+  AKS_B --> AFW_B
+  
+  ERGW_A -.-> OnPremDC
+  ERGW_B -.-> OnPremDC
+  
+  OnPremUsers --> ERGW_A
+  OnPremUsers --> ERGW_B
+  
+  HubA <--> HubB
+  
+  %% Styling
+  classDef natGateway fill:#e1f5fe,stroke:#0277bd,stroke-width:3px
+  classDef appService fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+  classDef data fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+  
+  class NAT_A,NAT_B natGateway
+  class AppSvcWeb_A,AppSvcAPI_A,AppSvcWeb_B,AppSvcAPI_B appService
+  class KV_A,SQL_A,Redis_A,Cosmos_A,Storage_A,Synapse_A,OpenAI_A,KV_B,SQL_B,Redis_B,Cosmos_B,Storage_B,Synapse_B,OpenAI_B data

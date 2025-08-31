@@ -1,0 +1,146 @@
+name: Render Architecture Diagrams
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'diagrams/**'
+      - 'plantuml/**'
+      - 'drawio/**'
+      - '.github/workflows/diagram-render.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'diagrams/**'
+      - 'plantuml/**'
+      - 'drawio/**'
+      - '.github/workflows/diagram-render.yml'
+
+jobs:
+  render-diagrams:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create docs/images directory
+      run: mkdir -p docs/images
+
+    - name: Render Mermaid diagrams
+      run: |
+        for file in diagrams/*.mmd; do
+          if [ -f "$file" ]; then
+            filename=$(basename "$file" .mmd)
+            echo "Rendering Mermaid diagram: $filename"
+            
+            # Render to SVG
+            curl -X POST "https://kroki.io/mermaid/svg" \
+              -H "Content-Type: text/plain" \
+              --data-binary "@$file" \
+              -o "docs/images/${filename}.svg"
+            
+            # Render to PNG
+            curl -X POST "https://kroki.io/mermaid/png" \
+              -H "Content-Type: text/plain" \
+              --data-binary "@$file" \
+              -o "docs/images/${filename}.png"
+            
+            # Render to PDF
+            curl -X POST "https://kroki.io/mermaid/pdf" \
+              -H "Content-Type: text/plain" \
+              --data-binary "@$file" \
+              -o "docs/images/${filename}.pdf"
+            
+            echo "✅ Rendered $filename to SVG, PNG, and PDF"
+          fi
+        done
+
+    - name: Render PlantUML diagrams
+      run: |
+        for file in plantuml/*.puml; do
+          if [ -f "$file" ]; then
+            filename=$(basename "$file" .puml)
+            echo "Rendering PlantUML diagram: $filename"
+            
+            # Render to SVG
+            curl -X POST "https://kroki.io/plantuml/svg" \
+              -H "Content-Type: text/plain" \
+              --data-binary "@$file" \
+              -o "docs/images/${filename}.svg"
+            
+            # Render to PNG
+            curl -X POST "https://kroki.io/plantuml/png" \
+              -H "Content-Type: text/plain" \
+              --data-binary "@$file" \
+              -o "docs/images/${filename}.png"
+            
+            # Render to PDF
+            curl -X POST "https://kroki.io/plantuml/pdf" \
+              -H "Content-Type: text/plain" \
+              --data-binary "@$file" \
+              -o "docs/images/${filename}.pdf"
+            
+            echo "✅ Rendered $filename to SVG, PNG, and PDF"
+          fi
+        done
+
+    - name: Render draw.io diagrams
+      run: |
+        for file in drawio/*.drawio; do
+          if [ -f "$file" ]; then
+            filename=$(basename "$file" .drawio)
+            echo "Rendering draw.io diagram: $filename"
+            
+            # Render to SVG
+            curl -X POST "https://kroki.io/drawio/svg" \
+              -H "Content-Type: text/plain" \
+              --data-binary "@$file" \
+              -o "docs/images/${filename}.svg"
+            
+            # Render to PNG
+            curl -X POST "https://kroki.io/drawio/png" \
+              -H "Content-Type: text/plain" \
+              --data-binary "@$file" \
+              -o "docs/images/${filename}.png"
+            
+            # Render to PDF
+            curl -X POST "https://kroki.io/drawio/pdf" \
+              -H "Content-Type: text/plain" \
+              --data-binary "@$file" \
+              -o "docs/images/${filename}.pdf"
+            
+            echo "✅ Rendered $filename to SVG, PNG, and PDF"
+          fi
+        done
+
+    - name: List rendered files
+      run: |
+        echo "📁 Rendered diagram files:"
+        ls -la docs/images/ || echo "No files rendered"
+
+    - name: Commit rendered diagrams
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add docs/images/
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Auto-render architecture diagrams [skip ci]"
+          git push
+          echo "✅ Committed and pushed rendered diagrams"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload rendered diagrams as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: rendered-diagrams
+        path: docs/images/
+        retention-days: 30

@@ -1,0 +1,105 @@
+@startuml azure-architecture-nat
+!define AzurePuml https://raw.githubusercontent.com/plantuml-stdlib/Azure-PlantUML/release/2-2/dist
+!includeurl AzurePuml/AzureCommon.puml
+!includeurl AzurePuml/AzureSimplified.puml
+!includeurl AzurePuml/Compute/AzureAppService.puml
+!includeurl AzurePuml/Compute/AzureKubernetesService.puml
+!includeurl AzurePuml/Databases/AzureCosmosDb.puml
+!includeurl AzurePuml/Databases/AzureSqlDatabase.puml
+!includeurl AzurePuml/Identity/AzureActiveDirectoryB2C.puml
+!includeurl AzurePuml/Networking/AzureApplicationGateway.puml
+!includeurl AzurePuml/Networking/AzureFirewall.puml
+!includeurl AzurePuml/Networking/AzureFrontDoor.puml
+!includeurl AzurePuml/Networking/AzureVirtualNetwork.puml
+!includeurl AzurePuml/Security/AzureKeyVault.puml
+!includeurl AzurePuml/Storage/AzureBlobStorage.puml
+!includeurl AzurePuml/AI/AzureOpenAI.puml
+
+title Azure Architecture with NAT Gateway for App Service Egress
+
+actor "End Users" as users
+cloud "Internet" as internet
+
+' Global services
+AzureActiveDirectoryB2C(aad, "Azure AD B2C", "Identity Provider")
+AzureFrontDoor(frontdoor, "Azure Front Door", "Global CDN + WAF + LB")
+
+' Region A Hub
+package "Region A - Hub VNet" {
+  AzureFirewall(firewall_a, "Azure Firewall", "AKS egress control")
+  component "Azure Bastion" as bastion_a
+  component "ExpressRoute GW" as ergw_a
+}
+
+' Region A Spoke
+package "Region A - Spoke VNet" {
+  
+  package "DMZ Subnet" {
+    AzureApplicationGateway(appgw_a, "Application Gateway v2", "WAF + Load Balancer")
+    component "API Management" as apim_a
+  }
+  
+  package "App Service Integration Subnet" {
+    AzureAppService(webapp_a, "Web Apps", "Frontend applications")
+    AzureAppService(apiapp_a, "API Apps", "Backend APIs")
+    component "NAT Gateway" as nat_a #lightblue
+    note right of nat_a : Static public IP\nfor outbound traffic
+  }
+  
+  package "AKS Subnet" {
+    AzureKubernetesService(aks_a, "AKS Cluster", "Container workloads")
+  }
+  
+  package "Private Endpoint Subnet" {
+    AzureKeyVault(kv_a, "Key Vault", "Secrets management")
+    AzureSqlDatabase(sql_a, "Azure SQL DB", "Relational data")
+    AzureCosmosDb(cosmos_a, "Cosmos DB", "Document database")
+    AzureBlobStorage(storage_a, "Blob Storage", "File storage")
+    AzureOpenAI(openai_a, "Azure OpenAI", "AI services")
+  }
+}
+
+' External services
+cloud "External APIs" as extapis
+cloud "Package Repositories" as packages
+
+' User flows
+users --> frontdoor : HTTPS
+users --> aad : OIDC/OAuth2
+
+' Front Door routing
+frontdoor --> appgw_a : Route to region
+
+' Application flow
+appgw_a --> apim_a : API requests
+apim_a --> webapp_a : Web traffic
+apim_a --> apiapp_a : API calls
+apim_a --> aks_a : Container services
+
+' App Service private connections
+webapp_a -.-> kv_a : Private Link
+apiapp_a -.-> sql_a : Private Link
+apiapp_a -.-> cosmos_a : Private Link
+apiapp_a -.-> openai_a : Private Link
+apiapp_a -.-> storage_a : Private Link
+
+' NAT Gateway egress (highlight this key feature)
+webapp_a --> nat_a : Outbound traffic
+apiapp_a --> nat_a : Outbound traffic
+nat_a ==> extapis : Static source IP
+nat_a ==> packages : Dependency downloads
+
+' AKS egress via firewall
+aks_a --> firewall_a : Controlled egress
+firewall_a ==> extapis : Filtered traffic
+firewall_a ==> packages : Package downloads
+
+' Hub-spoke connectivity
+note on link : VNet Peering
+firewall_a <--> appgw_a
+
+' On-premises connectivity
+component "On-Premises" as onprem
+ergw_a <--> onprem : ExpressRoute/VPN
+
+@enduml

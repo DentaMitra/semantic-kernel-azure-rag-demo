@@ -1,0 +1,94 @@
+flowchart TB
+  %% Regional view focusing on NAT Gateway egress for App Service
+  subgraph Internet[Internet]
+    ExtAPI[External APIs\n& Services]
+    Updates[OS Updates\n& Dependencies]
+  end
+  
+  subgraph RegionA[Primary Region - East US 2]
+    subgraph VNet[VNet (10.1.0.0/16)]
+      subgraph AppIntSubnet[App Service Integration Subnet\n10.1.100.0/24]
+        AppSvcWeb[App Service\nWeb Apps]
+        AppSvcAPI[App Service\nAPI Apps]
+        NAT[NAT Gateway\nStatic Public IP\nfor egress]
+      end
+      
+      subgraph AppGWSubnet[Application Gateway Subnet\n10.1.1.0/24]
+        AppGW[Application Gateway v2\nWAF enabled]
+      end
+      
+      subgraph PESubnet[Private Endpoint Subnet\n10.1.2.0/24]
+        KV_PE[Key Vault PE]
+        SQL_PE[Azure SQL PE]
+        OpenAI_PE[Azure OpenAI PE]
+        Cosmos_PE[Cosmos DB PE]
+        Storage_PE[Storage PE]
+      end
+      
+      subgraph AKSSubnet[AKS Subnet\n10.1.3.0/24]
+        AKS[AKS Cluster\nwith AGIC]
+      end
+    end
+    
+    subgraph PaaS[Azure PaaS Services]
+      KV[Key Vault]
+      SQL[Azure SQL Database]
+      OpenAI[Azure OpenAI]
+      Cosmos[Cosmos DB]
+      Storage[Blob Storage]
+    end
+  end
+  
+  subgraph HubVNet[Hub VNet - Shared Services]
+    AFW[Azure Firewall\nFor AKS egress]
+    Bastion[Azure Bastion]
+  end
+  
+  %% External connections
+  Users[End Users] --> AppGW
+  
+  %% Internal flow
+  AppGW --> AppSvcWeb
+  AppGW --> AppSvcAPI
+  AppGW --> AKS
+  
+  %% App Service to PaaS via Private Endpoints
+  AppSvcWeb -.Private Link.-> KV_PE
+  AppSvcAPI -.Private Link.-> SQL_PE
+  AppSvcAPI -.Private Link.-> OpenAI_PE
+  AppSvcAPI -.Private Link.-> Cosmos_PE
+  AppSvcAPI -.Private Link.-> Storage_PE
+  
+  %% Private Endpoints to actual services
+  KV_PE -.-> KV
+  SQL_PE -.-> SQL
+  OpenAI_PE -.-> OpenAI
+  Cosmos_PE -.-> Cosmos
+  Storage_PE -.-> Storage
+  
+  %% NAT Gateway egress (key feature)
+  AppSvcWeb --> NAT
+  AppSvcAPI --> NAT
+  NAT ==> ExtAPI
+  NAT ==> Updates
+  
+  %% AKS egress via Hub Firewall
+  AKS --> AFW
+  AFW ==> ExtAPI
+  AFW ==> Updates
+  
+  %% Hub peering
+  VNet <-.Peering.-> HubVNet
+  
+  %% Styling
+  classDef natGateway fill:#e1f5fe,stroke:#0277bd,stroke-width:4px
+  classDef appService fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+  classDef privateEndpoint fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+  classDef paasService fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+  classDef external fill:#ffebee,stroke:#c62828,stroke-width:2px
+  
+  class NAT natGateway
+  class AppSvcWeb,AppSvcAPI appService
+  class KV_PE,SQL_PE,OpenAI_PE,Cosmos_PE,Storage_PE privateEndpoint
+  class KV,SQL,OpenAI,Cosmos,Storage paasService
+  class ExtAPI,Updates external
